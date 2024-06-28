@@ -1,7 +1,9 @@
+import './index.css'
 import {Component} from 'react'
 
+import {v4 as uuidv4} from 'uuid'
+
 import TodoItem from '../TodoItem'
-import './index.css'
 
 const initialTodosList = [
   {
@@ -37,24 +39,74 @@ const initialTodosList = [
     title: 'Get essentials for Sunday car wash',
   },
 ]
-class SimpleTodos extends Component {
-  state = {todoList: initialTodosList}
 
-  onDeleteTodo = id => {
+// Write your code here
+class SimpleTodos extends Component {
+  state = {
+    todoList: initialTodosList,
+    inputData: '',
+    isEdit: false,
+  }
+
+  deleteTodo = todoId => {
     const {todoList} = this.state
-    const updatedTodo = todoList.filter(each => each.id !== id)
-    this.setState({todoList: updatedTodo})
+    const filteredUsersData = todoList.filter(each => each.id !== todoId)
+    this.setState({
+      todoList: filteredUsersData,
+    })
+  }
+
+  onChangeInput = event => {
+    this.setState({inputData: event.target.value})
+  }
+
+  onAddNewTask = () => {
+    const {inputData} = this.state
+    const newArr = {id: uuidv4(), title: inputData}
+    this.setState(prev => ({
+      todoList: [...prev.todoList, newArr],
+      inputData: '',
+    }))
+  }
+
+  onSaveExitingTask = (id, taskTitle) => {
+    const {todoList} = this.state
+    const newUpdatedList = todoList.map(each => {
+      if (each.id === id) {
+        return {...each, title: taskTitle}
+      }
+
+      return each
+    })
+    this.setState({todoList: newUpdatedList})
   }
 
   render() {
-    const {todoList} = this.state
+    const {todoList, inputData, isEdit} = this.state
     return (
-      <div className="simple=todos-app-container">
-        <div className="simple-todos-container">
-          <h1>Simple Todos</h1>
-          <ul>
+      <div className="bg-container">
+        <div className="todo-card">
+          <h1 className="heading">Simple Todos</h1>
+          <div className="input-div-container">
+            <input
+              type="text"
+              className="input"
+              placeholder="Add Task"
+              value={inputData}
+              onChange={this.onChangeInput}
+            />
+            <button onClick={this.onAddNewTask} className="add-task-btn">
+              Add
+            </button>
+          </div>
+          <ul className="todo">
             {todoList.map(eachTodo => (
-              <TodoItem todoDetails={eachTodo} onDelete={this.onDeleteTodo} />
+              <TodoItem
+                key={eachTodo.id}
+                todoList={eachTodo}
+                onEditedTask={this.onSaveExitingTask}
+                deleteTodo={this.deleteTodo}
+              />
             ))}
           </ul>
         </div>
@@ -62,4 +114,5 @@ class SimpleTodos extends Component {
     )
   }
 }
+
 export default SimpleTodos
